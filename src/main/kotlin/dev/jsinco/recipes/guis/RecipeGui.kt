@@ -7,6 +7,7 @@ import dev.jsinco.recipes.Util
 import dev.jsinco.recipes.recipe.Recipe
 import dev.jsinco.recipes.recipe.RecipeUtil
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
@@ -32,6 +33,12 @@ class RecipeGui(player: Player) : InventoryHolder {
             if (!Util.checkForRecipePermission(player, recipe.recipeKey)) continue
             recipeGuiItems.add(GuiItem.createRecipeGuiItem(recipe))
             totalRecipes++
+        }
+
+        // Sort the recipeGuiItems alphabetically based on their display name
+        recipeGuiItems.sortBy { itemStack ->
+            val meta = itemStack.itemMeta
+            ChatColor.stripColor(meta?.displayName ?: "")
         }
 
         val totalRecipesItem = GuiItem.getTotalRecipesItem(totalRecipes, recipes.size)
