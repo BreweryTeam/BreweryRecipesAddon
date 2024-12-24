@@ -119,6 +119,7 @@ class RecipesConfig : AddonConfigFile() {
 
         var items = GuiItemsSection()
         class GuiItemsSection : OkaeriConfig() {
+
             @CustomKey("recipe-gui-item")
             @Comment("The item that will be used to show all the recipes the player has",
                 "When material is set to POTION material the RGB/Color specified for the potion in the config will be used",
@@ -131,19 +132,18 @@ class RecipesConfig : AddonConfigFile() {
                 "               %ingredients% - The ingredients of the recipe using the ingredient-format"
             )
             var recipeGuiItem = RecipeGuiItemSection()
-
-            class RecipeGuiItemSection : AbstractOkaeriConfigSector<ConfigItemSection>() {
+            class RecipeGuiItemSection : ConfigRecipeItem, AbstractOkaeriConfigSector<ConfigItemSection>() {
                 @CustomKey("ingredient-format")
                 @Comment("The format for the ingredients",
                     "PLACEHOLDERS: %amount% - The amount of the ingredient",
                     "               %ingredient% - The ingredient's name"
                 )
-                var ingredientFormat = " &#F7FFC9%amount%x &f%ingredient%"
-                var material = Material.POTION
+                override var ingredientFormat = " &#F7FFC9%amount%x &f%ingredient%"
+                override var material = Material.POTION
                 var slots = listOf(19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34)
                 @CustomKey("display_name")
-                var displayName = "&#F7FFC9%recipe% &fRecipe"
-                var lore = listOf(
+                override var name = "&#F7FFC9%recipe% &fRecipe"
+                override var lore = listOf(
                     "&fDifficulty&7: &#F7FFC9%difficulty%",
                     "&fCooking Time&7: &#F7FFC9%cooking_time%m",
                     "&fDistill Runs&7: &#F7FFC9%distill_runs%",
@@ -155,22 +155,33 @@ class RecipesConfig : AddonConfigFile() {
                     "&fIngredients&7:",
                     "%ingredients%"
                 )
-                var glint = true
+                override var glint = true
                 @CustomKey("use-recipe-custom-model-data")
                 @CommentSpace(0)
                 @Comment("If true, the custom model data will be set to the recipe's custom model data")
-                var useRecipeCustomModelData = false
+                override var useRecipeCustomModelData = false
             }
 
             @CustomKey("unknown-recipe")
             @Comment("The item shown when a player does not know a recipe",
-                "Set this to AIR to disable completely and have only *known* recipes show up")
-            var unknownRecipe = ConfigItemSection.Builder()
-                .material(Material.AIR)
-                .name("&#f498f6??? Recipe")
-                .lore("&7This recipe is unknown to you")
-                .glint(false)
-                .build()
+                "Supports the same placeholders as recipe-gui-item")
+            var unknownRecipe = UnknownRecipeGuiItemSection()
+            class UnknownRecipeGuiItemSection : ConfigRecipeItem, AbstractOkaeriConfigSector<ConfigItemSection>() {
+                @CustomKey("ingredient-format")
+                @Comment("The format for the ingredients")
+                override var ingredientFormat = " &#F7FFC9%amount%x &f%ingredient%"
+                @CommentSpace(0)
+                @Comment("Set to AIR to disable completely and only have *known* recipes show up")
+                override var material = Material.AIR
+                @CustomKey("display_name")
+                override var name = "&#f498f6??? Recipe"
+                override var lore = listOf("&7This recipe is unknown to you")
+                override var glint = false
+                @CustomKey("use-recipe-custom-model-data")
+                @CommentSpace(0)
+                @Comment("If true, the custom model data will be set to the recipe's custom model data")
+                override var useRecipeCustomModelData = false
+            }
 
 
             @CustomKey("total_recipes")

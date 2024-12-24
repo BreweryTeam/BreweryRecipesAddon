@@ -44,13 +44,12 @@ class RecipeGui(player: Player) : InventoryHolder {
         }
 
         var knownRecipes = 0
-        val unknownRecipe = GuiItem.getUnknownRecipesItem().second
         for (maybeKnownRecipe in recipes) {
             if (maybeKnownRecipe.known) {
-                recipeGuiItems.add(GuiItem.createRecipeGuiItem(maybeKnownRecipe.recipe))
+                recipeGuiItems.add(GuiItem.createRecipeGuiItem(maybeKnownRecipe.recipe, true))
                 knownRecipes++
-            } else if (unknownRecipe.type != Material.AIR) {
-                recipeGuiItems.add(unknownRecipe)
+            } else if (config.gui.items.unknownRecipe.material != Material.AIR) {
+                recipeGuiItems.add(GuiItem.createRecipeGuiItem(maybeKnownRecipe.recipe, false))
             }
         }
 

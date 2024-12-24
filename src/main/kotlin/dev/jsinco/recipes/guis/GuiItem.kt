@@ -6,6 +6,7 @@ import dev.jsinco.recipes.configuration.ConfigItemSection
 import dev.jsinco.recipes.Recipes
 import dev.jsinco.recipes.configuration.RecipesConfig
 import dev.jsinco.recipes.Util
+import dev.jsinco.recipes.configuration.ConfigRecipeItem
 import dev.jsinco.recipes.recipe.Recipe
 import dev.jsinco.recipes.recipe.RecipeUtil
 import org.bukkit.Material
@@ -68,10 +69,14 @@ data class GuiItem(
             return itemPair
         }
 
-        fun getUnknownRecipesItem(): Pair<List<Int>, ItemStack> = createGUIItem(getGUIItem(config.gui.items.unknownRecipe), GuiItemType.BORDER_ITEM)
-
-        fun createRecipeGuiItem(recipe: Recipe): ItemStack {
-            val configItemSection = config.gui.items.recipeGuiItem
+        fun createRecipeGuiItem(recipe: Recipe, known: Boolean) : ItemStack {
+            return if (known) {
+                createRecipeGuiItem(recipe, config.gui.items.recipeGuiItem)
+            } else {
+                createRecipeGuiItem(recipe, config.gui.items.unknownRecipe)
+            }
+        }
+        private fun createRecipeGuiItem(recipe: Recipe, configItemSection: ConfigRecipeItem): ItemStack {
             val item = ItemStack(configItemSection.material)
             val meta = item.itemMeta ?: return item
 
@@ -82,8 +87,8 @@ data class GuiItem(
                 meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
             }
             meta.setDisplayName(BUtil.color( // display name
-                recipeItemStringHelper(configItemSection.displayName, recipe) ?: "&#F7FFC9${RecipeUtil.parseRecipeName(recipe.name)} &fRecipe")
-            )
+                recipeItemStringHelper(configItemSection.name, recipe)
+            ))
             if (configItemSection.glint) { // glint
                 meta.addEnchant(Enchantment.MENDING, 1, true)
             }
@@ -101,7 +106,7 @@ data class GuiItem(
                 ))
             }
             val lore: MutableList<String> = configItemSection.lore
-                .map { BUtil.color(recipeItemStringHelper(it, recipe) ?: "")}.toMutableList()
+                .map { BUtil.color(recipeItemStringHelper(it, recipe))}.toMutableList()
 
             replaceWithList("%ingredients%", ingredients, lore)
             replaceWithList("%lore%", recipe.lore, lore)
@@ -119,8 +124,7 @@ data class GuiItem(
             }
         }
         
-        private fun recipeItemStringHelper(string: String?, recipe: Recipe): String? {
-            if (string == null) return null
+        private fun recipeItemStringHelper(string: String, recipe: Recipe): String {
             return string
                 .replace("%recipe%", RecipeUtil.parseRecipeName(recipe.name))
                 .replace("%difficulty%", recipe.difficulty.toString())
